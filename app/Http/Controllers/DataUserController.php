@@ -44,7 +44,20 @@ class DataUserController extends Controller
         $perPage = (int) $request->query('per_page', 10);
         $q = trim((string) $request->query('q', ''));
 
-        $query = User::query()->select(['id', 'name', 'email', 'role', 'created_at'])->where('role', $requestedRole);
+        $query = User::query()
+            ->select(['id', 'name', 'email', 'role', 'created_at'])
+            ->where('role', $requestedRole)
+            ->with(['latestPayment' => function ($q) {
+                $q->select([
+                    'payments.id',
+                    'payments.user_id',
+                    'payments.status',
+                    'payments.amount',
+                    'payments.week_label',
+                    'payments.method',
+                    'payments.created_at',
+                ]);
+            }]);
 
         if ($q !== '') {
             $query->where(function ($b) use ($q) {
@@ -54,8 +67,22 @@ class DataUserController extends Controller
 
         $users = $query->orderByDesc('created_at')->paginate(max(1, $perPage));
 
+        $data = collect($users->items())->map(function (User $user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'created_at' => $user->created_at,
+                'last_payment_status' => $user->latestPayment?->status,
+                'last_payment_week' => $user->latestPayment?->week_label,
+                'last_payment_amount' => $user->latestPayment?->amount,
+                'last_payment_method' => $user->latestPayment?->method,
+            ];
+        });
+
         return response()->json([
-            'data' => $users->items(),
+            'data' => $data,
             'meta' => [
                 'total' => $users->total(),
                 'per_page' => $users->perPage(),
@@ -77,7 +104,31 @@ class DataUserController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        return response()->json(['data' => $user]);
+        $user->load(['latestPayment' => function ($q) {
+            $q->select([
+                'payments.id',
+                'payments.user_id',
+                'payments.status',
+                'payments.amount',
+                'payments.week_label',
+                'payments.method',
+                'payments.created_at',
+            ]);
+        }]);
+
+        return response()->json([
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'created_at' => $user->created_at,
+                'last_payment_status' => $user->latestPayment?->status,
+                'last_payment_week' => $user->latestPayment?->week_label,
+                'last_payment_amount' => $user->latestPayment?->amount,
+                'last_payment_method' => $user->latestPayment?->method,
+            ],
+        ]);
     }
 
     public function store(Request $request): JsonResponse
