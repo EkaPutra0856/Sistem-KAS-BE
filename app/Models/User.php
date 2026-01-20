@@ -27,6 +27,13 @@ class User extends Authenticatable
         'password',
         'role',
         'profile_photo',
+        'phone',
+        'auto_reminder_enabled',
+        'reminder_email_enabled',
+        'reminder_whatsapp_enabled',
+        'whatsapp_verified_at',
+        'whatsapp_verification_code',
+        'email_verification_code',
     ];
 
     /**
@@ -48,6 +55,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'whatsapp_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

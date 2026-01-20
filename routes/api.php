@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DataUserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentScheduleController;
+use App\Http\Controllers\DashboardController;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -13,6 +14,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/auth/verify-email', [AuthController::class, 'verifyEmail']);
+    Route::post('/auth/verify-whatsapp', [AuthController::class, 'verifyWhatsapp']);
+    Route::post('/auth/reminder-toggle', [AuthController::class, 'toggleReminder']);
+    Route::post('/auth/reminder-channels', [AuthController::class, 'updateReminderChannels']);
 
     // Admin-only user management endpoints
     Route::prefix('datausers')->group(function () {
@@ -36,5 +41,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [PaymentScheduleController::class, 'store']);
         Route::put('/{id}', [PaymentScheduleController::class, 'update']);
         Route::delete('/{id}', [PaymentScheduleController::class, 'destroy']);
+    });
+
+    // Dashboard aggregates
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/user', [DashboardController::class, 'user']);
+        Route::get('/admin', [DashboardController::class, 'admin']);
+        Route::get('/super-admin', [DashboardController::class, 'superAdmin']);
     });
 });
