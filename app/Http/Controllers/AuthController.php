@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Services\NotificationService;
+use App\Services\NotificationService as AppNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -42,7 +42,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function register(Request $request, NotificationService $notifier): JsonResponse
+    public function register(Request $request, AppNotificationService $notifier): JsonResponse
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -52,8 +52,8 @@ class AuthController extends Controller
             'role' => ['prohibited'], // prevent role escalation via register
         ]);
 
-        $emailCode = Str::upper(Str::random(6));
-        $waCode = Str::upper(Str::random(6));
+        $emailCode = (string) Str::upper(Str::random(6));
+        $waCode = (string) Str::upper(Str::random(6));
 
         $user = User::create([
             'name' => $validated['name'],
@@ -134,7 +134,7 @@ class AuthController extends Controller
             if ($validated['phone'] !== $user->phone) {
                 $user->phone = $validated['phone'];
                 $user->whatsapp_verified_at = null;
-                $user->whatsapp_verification_code = \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(6));
+                $user->whatsapp_verification_code = (string) \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(6));
             }
         }
 
@@ -211,7 +211,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function toggleReminder(Request $request, NotificationService $notifier): JsonResponse
+    public function toggleReminder(Request $request, AppNotificationService $notifier): JsonResponse
     {
         $user = $request->user();
         $validated = $request->validate([
