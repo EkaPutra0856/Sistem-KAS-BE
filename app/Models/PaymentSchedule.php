@@ -13,6 +13,7 @@ class PaymentSchedule extends Model
     protected $fillable = [
         'label',
         'start_date',
+        'pay_day_of_week',
         'created_by',
         'active',
         'end_date',
@@ -20,6 +21,7 @@ class PaymentSchedule extends Model
 
     protected $casts = [
         'start_date' => 'date',
+        'pay_day_of_week' => 'integer',
         'active' => 'boolean',
         'end_date' => 'date',
     ];

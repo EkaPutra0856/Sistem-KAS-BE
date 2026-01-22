@@ -37,6 +37,7 @@ class PaymentScheduleController extends Controller
         $validated = $request->validate([
             'label' => ['sometimes', 'string', 'max:255'],
             'start_date' => ['required', 'date'],
+            'pay_day_of_week' => ['sometimes', 'integer', 'min:0', 'max:6'],
             'end_date' => ['sometimes', 'nullable', 'date'],
             'active' => ['sometimes', 'boolean'],
         ]);
@@ -46,6 +47,7 @@ class PaymentScheduleController extends Controller
         $sched = PaymentSchedule::create([
             'label' => $validated['label'] ?? null,
             'start_date' => $validated['start_date'],
+            'pay_day_of_week' => $validated['pay_day_of_week'] ?? 5,
             'created_by' => $actor->id,
             'active' => $validated['active'] ?? true,
             'end_date' => $validated['end_date'] ?? null,
@@ -64,6 +66,7 @@ class PaymentScheduleController extends Controller
         $validated = $request->validate([
             'label' => ['sometimes', 'string', 'max:255'],
             'start_date' => ['sometimes', 'date'],
+            'pay_day_of_week' => ['sometimes', 'integer', 'min:0', 'max:6'],
             'end_date' => ['sometimes', 'nullable', 'date'],
             'active' => ['sometimes', 'boolean'],
         ]);
