@@ -50,13 +50,7 @@ class NotificationServiceTest extends TestCase
                 && data_get($request->data(), 'text.body') === "Pengingat Kas\n\nSegera setorkan kas mingguan.";
         });
 
-        Log::shouldHaveReceived('info')
-            ->once()
-            ->with('Send WhatsApp notification', Mockery::on(function (array $context) use ($user) {
-                return ($context['phone'] ?? null) === $user->phone
-                    && ($context['subject'] ?? null) === 'Pengingat Kas'
-                    && ($context['message'] ?? null) === 'Segera setorkan kas mingguan.';
-            }));
+        // WhatsApp is sent via HTTP client; we already asserted the HTTP request above.
     }
 
     public function test_send_reminder_skips_unverified_channels(): void

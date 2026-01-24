@@ -7,6 +7,7 @@ use App\Mail\VerificationMail;
 use App\Models\CompanyContact;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\Response as HttpResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -69,6 +70,7 @@ class NotificationService
             ],
         ];
 
+        /** @var HttpResponse $response */
         $response = Http::withToken($token)
             ->acceptJson()
             ->post("https://graph.facebook.com/v19.0/{$phoneNumberId}/messages", $body);
