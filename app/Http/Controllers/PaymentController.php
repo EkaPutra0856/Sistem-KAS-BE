@@ -9,15 +9,23 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\PayService;
 
 class PaymentController extends Controller
 {
-    private const METHODS = ['QRIS', 'Transfer', 'Tunai'];
+    private const METHODS = ['Transfer/Qris', 'Tunai'];
     private const STATUSES = ['pending', 'approved', 'rejected'];
 
-    private function serializePayment(Payment $payment): array
+    protected $paymentService;
+
+    public function __construct(PayService $paymentService)
     {
-        return [
+        $this->paymentService = $paymentService;
+    }
+
+    private function serializePayment(Payment $payment, ?string $snapToken = null): array
+    {
+        $data =  [
             'id' => $payment->id,
             'user' => $payment->user?->only(['id', 'name', 'email', 'role']),
             'recorded_by' => $payment->recordedBy?->only(['id', 'name', 'email']),
@@ -27,7 +35,6 @@ class PaymentController extends Controller
             'amount' => $payment->amount,
             'method' => $payment->method,
             'status' => $payment->status,
-            'proof_url' => $payment->proof_path ? Storage::disk('public')->url($payment->proof_path) : null,
             'schedule' => $payment->schedule ? [
                 'id' => $payment->schedule->id,
                 'label' => $payment->schedule->label,
@@ -37,6 +44,12 @@ class PaymentController extends Controller
             'approved_at' => $payment->approved_at,
             'created_at' => $payment->created_at,
         ];
+
+        if ($snapToken !== null) {
+            $data['snap_token'] = $snapToken;
+        }
+
+        return $data;
     }
 
     public function index(Request $request): JsonResponse
@@ -98,7 +111,6 @@ class PaymentController extends Controller
             'due_date' => ['sometimes', 'date'],
             'schedule_id' => ['sometimes', 'integer', 'exists:payment_schedules,id'],
             'user_id' => ['sometimes', 'integer', 'exists:users,id'],
-            'proof' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
         ]);
 
         $targetUserId = $actor->role === 'user'
@@ -122,11 +134,28 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Tidak dapat mencatat untuk super admin'], 403);
         }
 
-        $proofPath = null;
-        if ($request->hasFile('proof')) {
-            $file = $request->file('proof');
-            $filename = 'proofs/' . Str::random(16) . '.' . $file->getClientOriginalExtension();
-            $proofPath = $file->storeAs('proofs', basename($filename), 'public');
+        if($validated['method'] === 'Transfer/Qris'){
+            $paymentData = [
+                'user_id' => $targetUser->id,
+                'recorded_by' => $actor->role === 'admin' ? $actor->id : null,
+                'schedule_id' => $validated['schedule_id'] ?? null,
+                'week_label' => $validated['week_label'],
+                'due_date' => $validated['due_date'] ?? null,
+                'amount' => $validated['amount'],
+                'customer_name' => $targetUser->name,
+                'customer_email' => $targetUser->email,
+                'customer_phone' => $targetUser->phone ?? '',
+            ];
+
+            try {
+                $result = $this->paymentService->processPayment($paymentData);
+
+                return response()->json([
+                    'data' => $this->serializePayment($result['payment'], $result['snap_token']),
+                ], 201);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Gagal memproses pembayaran: ' . $e->getMessage()], 500);
+            }
         }
 
         $status = $actor->role === 'admin' ? 'approved' : 'pending';
@@ -138,12 +167,13 @@ class PaymentController extends Controller
             'week_label' => $validated['week_label'],
             'due_date' => $validated['due_date'] ?? null,
             'amount' => $validated['amount'],
-            'method' => $validated['method'],
+            'method' => 'Tunai',
             'status' => $status,
-            'proof_path' => $proofPath,
             'approved_at' => $status === 'approved' ? now() : null,
             'approved_by' => $status === 'approved' ? $actor->id : null,
         ]);
+
+
 
         return response()->json(['data' => $this->serializePayment($payment)], 201);
     }

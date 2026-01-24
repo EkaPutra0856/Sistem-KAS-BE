@@ -6,6 +6,12 @@ use App\Http\Controllers\DataUserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentScheduleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\WebhookController;
+
+// Midtrans webhook - public endpoint
+// Route::post('/midtrans/notification', [MidtransController::class, 'notification']);
+Route::post('/midtrans/webhook', [WebhookController::class, 'handle']);
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);

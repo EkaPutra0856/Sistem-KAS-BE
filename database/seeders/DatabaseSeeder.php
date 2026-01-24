@@ -7,6 +7,7 @@ use App\Models\Payment;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\PaymentScheduleSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,6 +18,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(PaymentScheduleSeeder::class);
         $users = [
             [
                 'name' => 'Demo User',

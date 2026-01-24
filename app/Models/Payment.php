@@ -18,8 +18,9 @@ class Payment extends Model
         'due_date',
         'amount',
         'method',
+        'order_id',
+        'snap_token',
         'status',
-        'proof_path',
         'approved_at',
         'approved_by',
     ];
