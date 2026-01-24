@@ -49,6 +49,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{id}', [PaymentScheduleController::class, 'destroy']);
     });
 
+    // Company contact (admin)
+    Route::get('/company-contact', [CompanyContactController::class, 'show']);
+    Route::put('/company-contact', [CompanyContactController::class, 'update']);
+    Route::get('/company-contact/history', [CompanyContactController::class, 'history']);
+
     // Dashboard aggregates
     Route::prefix('dashboard')->group(function () {
         Route::get('/user', [DashboardController::class, 'user']);
