@@ -6,6 +6,7 @@ use App\Http\Controllers\DataUserController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentScheduleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\CompanyContactController;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -42,6 +43,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [PaymentScheduleController::class, 'update']);
         Route::delete('/{id}', [PaymentScheduleController::class, 'destroy']);
     });
+
+    // Company contact (admin)
+    Route::get('/company-contact', [CompanyContactController::class, 'show']);
+    Route::put('/company-contact', [CompanyContactController::class, 'update']);
+    Route::get('/company-contact/history', [CompanyContactController::class, 'history']);
 
     // Dashboard aggregates
     Route::prefix('dashboard')->group(function () {

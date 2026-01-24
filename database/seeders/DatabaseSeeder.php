@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\Payment;
+use App\Models\CompanyContact;
+use App\Models\CompanyContactHistory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -78,6 +80,26 @@ class DatabaseSeeder extends Seeder
                     'due_date' => now()->addDays(10)->toDateString(),
                 ],
             );
+        }
+
+        $adminSource = User::whereIn('role', ['admin', 'super-admin'])->orderBy('id')->first();
+
+        if ($adminSource) {
+            $contact = CompanyContact::updateOrCreate(
+                ['id' => 1],
+                [
+                    'email' => $adminSource->email,
+                    'phone' => $adminSource->phone,
+                    'updated_by' => $adminSource->id,
+                ],
+            );
+
+            CompanyContactHistory::create([
+                'email' => $contact->email,
+                'phone' => $contact->phone,
+                'changed_by' => $adminSource->id,
+                'changed_at' => now(),
+            ]);
         }
     }
 }
