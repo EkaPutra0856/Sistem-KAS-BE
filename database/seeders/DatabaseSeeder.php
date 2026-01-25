@@ -20,7 +20,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(PaymentScheduleSeeder::class);
         $users = [
             [
                 'name' => 'Demo User',
@@ -47,61 +46,6 @@ class DatabaseSeeder extends Seeder
                 ['email' => $user['email']],
                 $user,
             );
-        }
-
-        $member = User::where('email', 'user@example.com')->first();
-        $admin = User::where('email', 'admin@example.com')->first();
-
-        if ($member && $admin) {
-            Payment::updateOrCreate(
-                ['user_id' => $member->id, 'week_label' => 'Minggu 2', 'status' => 'approved'],
-                [
-                    'amount' => 50000,
-                    'method' => 'QRIS',
-                    'recorded_by' => $admin->id,
-                    'approved_by' => $admin->id,
-                    'approved_at' => now()->subWeek(),
-                    'due_date' => now()->subDays(10)->toDateString(),
-                ],
-            );
-
-            Payment::updateOrCreate(
-                ['user_id' => $member->id, 'week_label' => 'Minggu 3', 'status' => 'pending'],
-                [
-                    'amount' => 50000,
-                    'method' => 'Transfer',
-                    'due_date' => now()->addDays(3)->toDateString(),
-                ],
-            );
-
-            Payment::updateOrCreate(
-                ['user_id' => $member->id, 'week_label' => 'Minggu 4', 'status' => 'pending'],
-                [
-                    'amount' => 50000,
-                    'method' => 'QRIS',
-                    'due_date' => now()->addDays(10)->toDateString(),
-                ],
-            );
-        }
-
-        $adminSource = User::whereIn('role', ['admin', 'super-admin'])->orderBy('id')->first();
-
-        if ($adminSource) {
-            $contact = CompanyContact::updateOrCreate(
-                ['id' => 1],
-                [
-                    'email' => $adminSource->email,
-                    'phone' => $adminSource->phone,
-                    'updated_by' => $adminSource->id,
-                ],
-            );
-
-            CompanyContactHistory::create([
-                'email' => $contact->email,
-                'phone' => $contact->phone,
-                'changed_by' => $adminSource->id,
-                'changed_at' => now(),
-            ]);
         }
     }
 }
