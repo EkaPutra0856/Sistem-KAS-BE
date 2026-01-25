@@ -7,6 +7,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentScheduleController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WebhookController;
+use App\Http\Controllers\FeeInfoController;
 
 // Midtrans webhook - public endpoint
 Route::post('/midtrans/webhook', [WebhookController::class, 'handle']);
@@ -46,6 +47,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [PaymentScheduleController::class, 'update']);
         Route::delete('/{id}', [PaymentScheduleController::class, 'destroy']);
     });
+
+    // Iuran/fee info
+    Route::get('/fee-info', [FeeInfoController::class, 'show']);
+    Route::put('/fee-info', [FeeInfoController::class, 'update']);
 
     // Dashboard aggregates
     Route::prefix('dashboard')->group(function () {

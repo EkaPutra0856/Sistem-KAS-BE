@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\PaymentScheduleSeeder;
+use Database\Seeders\FeeInfoSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -47,5 +48,10 @@ class DatabaseSeeder extends Seeder
                 $user,
             );
         }
+
+        $this->call([
+            PaymentScheduleSeeder::class,
+            FeeInfoSeeder::class,
+        ]);
     }
 }
